@@ -17,10 +17,16 @@ class SnippetsProvider
     if typeof snippetsSource?.snippetsForScopes is "function"
       @snippetsSource = snippetsSource
 
-  getSuggestions: ({scopeDescriptor, prefix}) ->
+  getSuggestions: ({scopeDescriptor, prefix, editor, bufferPosition}) ->
     return unless prefix?.length
+    prefix = @getPrefix(editor, bufferPosition)
     scopeSnippets = @snippetsSource.snippetsForScopes(scopeDescriptor)
     @findSuggestionsForPrefix(scopeSnippets, prefix)
+
+  getPrefix: (editor, bufferPosition) ->
+    regex = /[.]*[\w0-9_-]+$/
+    line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
+    line.match(regex)?[0] or ''
 
   findSuggestionsForPrefix: (snippets, prefix) ->
     return [] unless snippets?
